@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { zipSync } from 'fflate'
 
 const root = fileURLToPath(new URL('../', import.meta.url))
+const license = await readFile(join(root, 'LICENSE'))
 async function collect(dir) {
   const entries = await readdir(join(root, dir), { withFileTypes: true })
   const lists = await Promise.all(
@@ -28,10 +29,13 @@ async function archive(target, files, base = '') {
   )
   await writeFile(
     join(root, 'public', target),
-    zipSync(Object.fromEntries(entries), {
-      level: 6,
-      mtime: new Date(2000, 0, 1),
-    })
+    zipSync(
+      { ...Object.fromEntries(entries), LICENSE: license },
+      {
+        level: 6,
+        mtime: new Date(2000, 0, 1),
+      }
+    )
   )
 }
 await mkdir(join(root, 'public'), { recursive: true })

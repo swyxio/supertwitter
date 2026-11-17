@@ -2,6 +2,9 @@
   "name": "supertwitter",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
+  "repository": "github:swyxio/supertwitter",
+  "homepage": "https://x.swyx.io/",
   "type": "module",
   "packageManager": "pnpm@10.33.1",
   "scripts": {

@@ -164,6 +164,14 @@ export function SettingsPanel({
       ))}
       <h3>Workspace</h3>
       <div className="menu-list">
+        <a
+          href="https://github.com/swyxio/supertwitter"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <ExternalLink />
+          View source on GitHub
+        </a>
         <a href="/source.zip" download>
           <Download />
           Download source for local use

@@ -316,8 +316,12 @@ export function RightRail({
       <footer className="side-foot">
         <span>Independent X client</span>
         <span>·</span>
-        <a href="/source.zip" download>
-          Source
+        <a
+          href="https://github.com/swyxio/supertwitter"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          GitHub
         </a>
         <span>·</span>
         <button onClick={settings}>Settings</button>
