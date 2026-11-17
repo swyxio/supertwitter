@@ -1,4 +1,5 @@
 /*
+  Cache-Control: public, no-transform
   Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https://pbs.twimg.com https://abs.twimg.com; media-src https://video.twimg.com; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'
   Referrer-Policy: no-referrer
   X-Content-Type-Options: nosniff
@@ -8,3 +9,7 @@
   Content-Disposition: attachment; filename="supertwitter-connector.zip"
 /source.zip
   Content-Disposition: attachment; filename="supertwitter-source.zip"
+/assets/*
+  Cache-Control: max-age=31536000, immutable
+/media/*
+  Cache-Control: max-age=86400

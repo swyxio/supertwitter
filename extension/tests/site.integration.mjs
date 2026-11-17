@@ -6,7 +6,7 @@ import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium, expect } from '@playwright/test'
 
-const app = 'http://127.0.0.1:5173'
+const app = process.env.TEST_BASE_URL || 'http://127.0.0.1:5173'
 const extension = fileURLToPath(new URL('../', import.meta.url))
 const photo = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl9HxkAAAAASUVORK5CYII=',

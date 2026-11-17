@@ -42,7 +42,7 @@ pnpm test:connector
 pnpm build
 ```
 
-Run the full UI/connector integration test with `pnpm test:integration` while `pnpm dev` already running on port 5173. Both Chromium extension test suites use mock X data in disposable browser profiles. The deploy script targets the configured x.swyx.io hostname. Set your own Worker name and custom domain before deploying a fork, and update the extension allowlist for that origin.
+Run the full UI/connector integration test with `pnpm test:integration` while `pnpm dev` is running on port 5173. Both Chromium extension test suites use mock X data in disposable browser profiles. The deploy script targets the configured x.swyx.io hostname. Set your own Worker name and custom domain before deploying a fork, and update the extension allowlist for that origin.
 
 All frontend code is in `src/`. The browser connector is in `extension/`. The packaging step creates downloadable source and connector ZIPs from explicitly included project files. The initial screen loads its own fonts from the system, local image assets, and its own bundled JavaScript.
 
