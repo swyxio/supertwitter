@@ -10,6 +10,7 @@
 /source.zip
   Content-Disposition: attachment; filename="supertwitter-source.zip"
 /assets/*
-  Cache-Control: max-age=31536000, immutable
+  ! Cache-Control
+  Cache-Control: public, max-age=31536000, immutable
 /media/*
   Cache-Control: max-age=86400
