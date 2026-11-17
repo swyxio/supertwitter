@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Connected accounts · SuperTwitter</title>
+    <link rel="stylesheet" href="local.css" />
+    <script src="options.mjs" type="module"></script>
+  </head>
+  <body>
+    <main>
+      <header>
+        <span class="wordmark">SuperTwitter</span
+        ><span class="local">Local connector</span>
+      </header>
+      <h1>Connected accounts</h1>
+      <p>
+        Authorize each X account once to switch between them in SuperTwitter.
+        The extension keeps your tokens in this Chrome profile and sends them
+        directly to X.
+      </p>
+      <ul id="accounts" class="accounts"></ul>
+      <section>
+        <h2>Connect an X account</h2>
+        <p>
+          In the
+          <a href="https://console.x.com/" target="_blank" rel="noreferrer"
+            >X Developer Console</a
+          >, enable OAuth 2.0 on a Native App or Single page App with read and
+          write access. Your app needs X API access for the features you use.
+        </p>
+        <label for="callback">Callback URL</label>
+        <div class="copy">
+          <input id="callback" readonly /><button
+            type="button"
+            id="copy"
+            class="secondary"
+          >
+            Copy
+          </button>
+        </div>
+        <p class="hint">
+          Register this exact callback in your app’s user authentication
+          settings. Use <strong>https://x.swyx.io</strong> for the website URL.
+        </p>
+        <form id="connect">
+          <label for="client-id">OAuth 2.0 client ID</label
+          ><input
+            id="client-id"
+            required
+            maxlength="256"
+            spellcheck="false"
+            autocomplete="off"
+            placeholder="Public client ID"
+          />
+          <p class="hint">
+            To add another account, select it on
+            <a href="https://x.com/" target="_blank" rel="noreferrer">X</a>
+            before authorizing. Your existing connected accounts stay available
+            here.
+          </p>
+          <button id="connect-button">Connect with X</button>
+        </form>
+      </section>
+      <section>
+        <h2>Site access</h2>
+        <p>
+          Allow these sites to display connected accounts and feeds. You confirm
+          each change to X in this extension.
+        </p>
+        <label class="toggle"
+          ><input id="hosted" type="checkbox" /> x.swyx.io</label
+        >
+        <label class="toggle"
+          ><input id="local" type="checkbox" /> Local app on port 5173</label
+        >
+      </section>
+      <p>
+        Manage provider access in
+        <a
+          href="https://x.com/settings/connected_apps"
+          target="_blank"
+          rel="noreferrer"
+          >X connected apps</a
+        >.
+      </p>
+      <p class="status" role="status" id="status"></p>
+    </main>
+  </body>
+</html>

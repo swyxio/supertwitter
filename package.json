@@ -1,0 +1,35 @@
+{
+  "name": "supertwitter",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.33.1",
+  "scripts": {
+    "dev": "node scripts/package-downloads.mjs && vite --host 127.0.0.1 --port 5173 --strictPort",
+    "typecheck": "tsc --noEmit",
+    "build": "pnpm typecheck && node scripts/package-downloads.mjs && vite build",
+    "test": "playwright test",
+    "deploy": "pnpm build && wrangler deploy",
+    "test:connector": "node --test extension/tests/*.test.mjs",
+    "test:integration": "node --test extension/tests/site.integration.mjs"
+  },
+  "dependencies": {
+    "idb-keyval": "^6.3.0",
+    "lucide-react": "^0.544.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "twitter-text": "3.1.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.0",
+    "@tailwindcss/vite": "^4.1.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@types/twitter-text": "^3.1.0",
+    "fflate": "^0.8.3",
+    "tailwindcss": "^4.1.0",
+    "typescript": "~5.9.3",
+    "vite": "^7.3.0",
+    "wrangler": "^4.164.0"
+  }
+}

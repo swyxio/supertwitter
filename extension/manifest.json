@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "SuperTwitter local connector",
+  "version": "1.0.0",
+  "description": "Connect your X accounts to SuperTwitter on this device.",
+  "minimum_chrome_version": "116",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAh6OVF9DBS72fqUszd/F/S8iyKdrArgjLObYw4cb3NxbKEpkjau7ztespKQH6BlVq6eQcZfSUO8Od2JK9/7KxMdGngtcmQa615lrL0QbKsMRTRz+sK1yuNXyz3qIbXjtrwNjmb91sWVy0OaGZB70UkX6nQrE0NyZUI0P62I5JbHkwMbBx08otr0vPplBZOR0YO0zKDwguZbxuhyHZkLcMujZswGLUaMuZ5uy2g703xZ398/35/mNmPoi3n6XaZ4prhoDszJ5jc0CjlX15j/0a/O+35pFDvE/FOfIDMZgVu8DezGU1CsAMGLrDPsQnZeH9EdzrigDnYGiZXm4ShN0MTQIDAQAB",
+  "permissions": ["identity", "storage"],
+  "host_permissions": ["https://api.x.com/*"],
+  "background": {"service_worker": "worker.mjs", "type": "module"},
+  "options_page": "options.html",
+  "action": {"default_title": "Manage connected X accounts"},
+  "content_scripts": [{
+    "matches": ["https://x.swyx.io/*", "http://localhost/*", "http://127.0.0.1/*"],
+    "include_globs": ["https://x.swyx.io/*", "http://localhost:5173/*", "http://127.0.0.1:5173/*"],
+    "run_at": "document_start",
+    "js": ["bridge.js"]
+  }],
+  "content_security_policy": {"extension_pages": "default-src 'self'; script-src 'self'; object-src 'none'; img-src 'self' data:; connect-src https://api.x.com; base-uri 'none'; frame-ancestors 'none'"}
+}

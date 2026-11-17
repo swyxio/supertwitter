@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.wrangler/
+.env*
+.dev.vars*
+test-results/
+playwright-report/
+.DS_Store
+public/connector.zip
+public/source.zip

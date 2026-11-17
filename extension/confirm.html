@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Review X action · SuperTwitter</title>
+    <link rel="stylesheet" href="local.css" />
+    <script src="confirm.mjs" type="module"></script>
+  </head>
+  <body>
+    <main class="confirmation">
+      <header>
+        <span class="wordmark">SuperTwitter</span
+        ><span class="local">Local connector</span>
+      </header>
+      <h1 id="title">Review X action</h1>
+      <p id="source"></p>
+      <article id="review" hidden>
+        <strong id="account"></strong>
+        <p id="text" class="post"></p>
+        <img id="image" hidden alt="" />
+        <p id="alt" class="hint" hidden></p>
+        <a
+          id="target"
+          href="https://x.com/"
+          target="_blank"
+          rel="noreferrer"
+          hidden
+          >View original post on X ↗</a
+        >
+      </article>
+      <div class="buttons">
+        <button type="button" class="secondary" id="cancel">Cancel</button
+        ><button type="button" id="accept" disabled>Confirm</button>
+      </div>
+      <p id="status" class="status" role="status"></p>
+    </main>
+  </body>
+</html>
