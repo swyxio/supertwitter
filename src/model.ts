@@ -14,6 +14,7 @@ export interface Post {
   metrics: { replies: number; reposts: number; likes: number; views?: number }
   media?: { url: string; alt?: string; type?: string }[]
   liked?: boolean
+  repostedBy?: string
   reposted?: boolean
   bookmarked?: boolean
   replyTo?: string

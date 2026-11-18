@@ -22,13 +22,15 @@ import { actionField, localAccount, updateAction, zeroMetrics } from './model'
 import type { Account, Action, Post } from './model'
 import { people, previewAccounts, samplePosts, topics } from './preview'
 import { AccountsPanel, SettingsPanel } from './Panels'
-import { PostCard } from './PostCard'
+import { PostCard, PublicPostCard } from './PostCard'
+import { HighSignalFeed } from './HighSignalFeed'
 import { RightRail, SearchBox, Sidebar } from './Shell'
 import { defaults, emptyWorkspace, useRoute, useStored } from './state'
 import { Avatar, Empty, Modal, Verified } from './ui'
 import { useLiveFeed } from './useLiveFeed'
 import type { Stream } from './useLiveFeed'
 
+type TimelineTab = 'high-signal' | 'following' | 'top'
 type Dialog = 'accounts' | 'posting-accounts' | 'settings' | 'compose' | null
 const labels: Record<string, string> = {
   '/': 'Home',
@@ -250,9 +252,8 @@ function WorkspaceView({
 }: WorkspaceProps) {
   const demo = localAccount(account)
   const [ws, save] = useStored('workspace.' + account.id, emptyWorkspace)
-  const [tab, setTab] = useStored<'following' | 'top'>(
-    'tab.' + account.id,
-    () => (demo ? 'top' : 'following')
+  const [tab, setTab] = useStored<TimelineTab>('tab.' + account.id, () =>
+    demo ? 'high-signal' : 'following'
   )
   const [replyTarget, setReplyTarget] = useState<Post | null>(null)
   const [recent, setRecent] = useState<Post[]>([])
@@ -266,6 +267,18 @@ function WorkspaceView({
   }, [])
   const [pendingDelete, setPendingDelete] = useState<string | null>(null)
   const path = route.path
+  const showList = path === '/' && tab === 'high-signal'
+  const timelineTabs: { id: TimelineTab; label: string }[] = demo
+    ? [
+        { id: 'high-signal', label: 'AI High Signal' },
+        { id: 'top', label: 'For you' },
+        { id: 'following', label: 'Following' },
+      ]
+    : [
+        { id: 'following', label: 'Following' },
+        { id: 'high-signal', label: 'AI High Signal' },
+        { id: 'top', label: 'Popular' },
+      ]
   const q = route.query.get('q')?.trim() || ''
   const detailId = path.startsWith('/post/') ? decode(path.slice(6)) : ''
   const personSlug = path.startsWith('/user/') ? decode(path.slice(6)) : ''
@@ -287,6 +300,7 @@ function WorkspaceView({
     detailId,
     !demo &&
       connected &&
+      !showList &&
       path !== '/drafts' &&
       Boolean(labels[path] || detailId || personSlug)
   )
@@ -445,6 +459,7 @@ function WorkspaceView({
           ? 'Reply published on X.'
           : 'Post published on X.'
     )
+    if (!parent && tab === 'high-signal') setTab(demo ? 'top' : 'following')
     if (parent) go('/post/' + encodeURIComponent(parent.id))
     else if (path !== '/profile') go('/')
   }
@@ -712,11 +727,11 @@ function WorkspaceView({
             {demo && (
               <button
                 className="preview-chip"
-                title="Sample posts stored on this device. Connect an X account."
+                title="Using a local preview account. Connect an X account."
                 onClick={switchPanel}
               >
                 <span />
-                Local preview
+                {showList ? 'Preview account' : 'Local preview'}
               </button>
             )}
             <button
@@ -730,28 +745,19 @@ function WorkspaceView({
           </div>
           {path === '/' && (
             <div className="feed-tabs" aria-label="Timelines">
-              {(demo
-                ? (['top', 'following'] as const)
-                : (['following', 'top'] as const)
-              ).map((t) => (
+              {timelineTabs.map(({ id, label }) => (
                 <button
-                  key={t}
-                  className={tab === t ? 'active' : ''}
-                  aria-pressed={tab === t}
+                  key={id}
+                  className={tab === id ? 'active' : ''}
+                  aria-pressed={tab === id}
                   title={
-                    t === 'top' && !demo
+                    id === 'top' && !demo
                       ? 'Loaded following posts sorted by like count'
                       : undefined
                   }
-                  onClick={() => setTab(t)}
+                  onClick={() => setTab(id)}
                 >
-                  <span>
-                    {t === 'following'
-                      ? 'Following'
-                      : demo
-                        ? 'For you'
-                        : 'Popular'}
-                  </span>
+                  <span>{label}</span>
                 </button>
               ))}
             </div>
@@ -846,7 +852,17 @@ function WorkspaceView({
           </div>
         )}
         {path === '/notifications' && <h2 className="subheading">Mentions</h2>}
-        {path === '/drafts' ? (
+        {showList ? (
+          <HighSignalFeed
+            renderPost={(p) =>
+              demo || !connected ? (
+                <PublicPostCard key={p.id} p={p} prefs={prefs} />
+              ) : (
+                card(p)
+              )
+            }
+          />
+        ) : path === '/drafts' ? (
           draftKeys.length ? (
             draftKeys.map((k) => (
               <div className="draft-row" key={k}>
@@ -915,6 +931,7 @@ function WorkspaceView({
         choose={pick}
         settings={() => setDialog('settings')}
         media={prefs.media}
+        showList={showList}
       />
       {dialog === 'compose' && (
         <Modal

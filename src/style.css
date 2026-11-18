@@ -370,6 +370,54 @@ h1,
 .mobile-compose {
   display: none;
 }
+.list-update {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 16px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 13px;
+}
+.repost-credit {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 3px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+.repost-credit:hover {
+  text-decoration: underline;
+}
+.photo.video-preview {
+  position: relative;
+  cursor: pointer;
+}
+.video-preview span {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 8px;
+  background: #000b;
+  color: white;
+  padding: 3px 7px;
+  font-size: 12px;
+}
+.public-post .post-text {
+  cursor: auto;
+}
+.public-post .origin-link {
+  color: var(--accent);
+}
+.public-post span.action:hover {
+  background: transparent;
+  color: var(--muted);
+}
 .feed-tabs {
   height: 48px;
   display: flex;

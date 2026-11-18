@@ -9,14 +9,16 @@
   "packageManager": "pnpm@10.33.1",
   "scripts": {
     "dev": "node scripts/package-downloads.mjs && vite --host 127.0.0.1 --port 5173 --strictPort",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p worker/tsconfig.json",
     "build": "pnpm typecheck && node scripts/package-downloads.mjs && vite build",
     "test": "playwright test",
     "deploy": "pnpm build && wrangler deploy",
     "test:connector": "node --test extension/tests/*.test.mjs",
-    "test:integration": "node --test extension/tests/site.integration.mjs"
+    "test:integration": "node --test extension/tests/site.integration.mjs",
+    "test:feed": "node --experimental-strip-types --test worker/tests/*.test.mjs"
   },
   "dependencies": {
+    "cheerio": "^1.2.0",
     "idb-keyval": "^6.3.0",
     "lucide-react": "^0.544.0",
     "react": "^19.2.0",
@@ -24,8 +26,10 @@
     "twitter-text": "3.1.0"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261118.1",
     "@playwright/test": "^1.58.0",
     "@tailwindcss/vite": "^4.1.0",
+    "@types/node": "^22.20.5",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@types/twitter-text": "^3.1.0",

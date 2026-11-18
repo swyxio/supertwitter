@@ -198,6 +198,7 @@ export function RightRail({
   choose,
   settings,
   media,
+  showList,
 }: {
   account: Account
   accounts: Account[]
@@ -208,6 +209,7 @@ export function RightRail({
   choose: (a: Account) => void
   settings: () => void
   media: boolean
+  showList: boolean
 }) {
   const search = (q: string) =>
     go('/explore' + (q ? '?q=' + encodeURIComponent(q) : ''))
@@ -215,9 +217,12 @@ export function RightRail({
   return (
     <aside className="right-rail">
       <div className="search-sticky">
-        <SearchBox search={search} />
+        <SearchBox
+          search={search}
+          placeholder={demo && showList ? 'Search local preview' : 'Search'}
+        />
       </div>
-      {demo ? (
+      {demo && !showList ? (
         <>
           <section className="side-card">
             <h2>What’s happening</h2>
@@ -275,9 +280,9 @@ export function RightRail({
       ) : (
         <>
           <section className="side-card">
-            <h2>Your accounts</h2>
+            <h2>{demo ? 'Preview accounts' : 'Your accounts'}</h2>
             {accounts
-              .filter((a) => !localAccount(a))
+              .filter((a) => localAccount(a) === demo)
               .map((a) => (
                 <button
                   className="account-row"

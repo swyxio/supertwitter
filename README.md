@@ -1,6 +1,6 @@
 # SuperTwitter
 
-A local-first, independently implemented X client hosted at [x.swyx.io](https://x.swyx.io/). React, TypeScript, Tailwind and static Cloudflare Workers assets. The site serves public files. It has no login endpoint, database, analytics or credential proxy.
+A local-first, independently implemented X client hosted at [x.swyx.io](https://x.swyx.io/). React, TypeScript and Tailwind power the interface. A Cloudflare Worker serves static assets and a shared AI High Signal feed. Account authorization and publishing run in the local browser connector.
 
 ## Run locally
 
@@ -13,7 +13,7 @@ pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Open http://127.0.0.1:5173. Both sample accounts work offline after the local server starts. The posts and engagement counts in the sample feed are illustrative. Publishing in local preview affects only the selected preview account on this browser and origin.
+Open http://127.0.0.1:5173. The AI High Signal tab reads the hosted public feed through the local dev server. The For you sample timeline and both preview accounts also work offline after the local server starts. The posts and engagement counts in the sample feed are illustrative. Publishing in local preview affects only the selected preview account on this browser and origin.
 
 ## Connect X
 
@@ -28,11 +28,17 @@ The extension implements OAuth 2.0 Authorization Code with PKCE. It keeps access
 
 ## Client behavior
 
-- **Home** includes an illustrative For you feed in preview. Connected accounts start on X’s chronological Following feed. Popular sorts the loaded posts by likes.
+- **Home** starts new preview accounts on AI High Signal, a shared feed of public posts from [the curated X list](https://x.com/i/lists/1585430245762441216). Readers can open the original posts on X. The For you tab contains sample data. Connected accounts start on Following and can also select AI High Signal.
 - **Account switching** isolates drafts, replies, attachments, preview activity and timeline tabs. Pin accounts in the switcher to choose their order. Alt/Option+1–9 switches directly to the corresponding account. Unfinished drafts save as you type. Preview posts are private to the browser account that created them.
 - **Posting** supports text, links, replies and one JPEG, PNG or WebP up to 2 MiB, with an optional image description. Ctrl/Command+Enter submits. Each attached file is saved in local IndexedDB until used or discarded.
 - **Explore** searches the available posts. **Notifications** shows mentions. **Messages** opens the official X site in a new tab using its own signed-in account. **More** controls theme, compact spacing, media loading and engagement counts.
 - Live bookmarks, likes, reposts, profile posts, direct post lookup and paginated feeds use the official X API. The connector keeps recent action state for this device where X omits viewer flags. The client displays photos and image previews for other media.
+
+## Shared list feed
+
+`GET /api/high-signal` returns `{posts, updatedAt}`. The Worker reads one configured public list page and publishes its normalized posts. Browsers receive canonical post IDs and approved X media URLs. A single SQLite-backed Durable Object stores the last successful snapshot, coalesces concurrent reads, and refreshes on demand after 15 minutes. During an outage it serves the previous snapshot with its original update time.
+
+Set the Worker secret `FEED_SOURCE_URL` to the full HTTPS list page URL at deployment time. Its path should be `/i/lists/<numeric-id>`. For local Worker development, put this value in the ignored `.dev.vars` file and run `pnpm build && pnpm exec wrangler dev`. Ordinary frontend development with `pnpm dev` needs no upstream configuration.
 
 ## Verify and deploy
 
@@ -41,6 +47,7 @@ pnpm typecheck
 pnpm exec playwright install chromium
 pnpm test
 pnpm test:connector
+pnpm test:feed
 pnpm build
 ```
 

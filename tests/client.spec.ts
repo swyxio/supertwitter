@@ -1,4 +1,36 @@
 import { test, expect } from '@playwright/test'
+import type { Post } from '../src/model'
+
+const sampleListPost: Post = {
+  id: '1234567890123456789',
+  author: { id: '789', name: 'Example Research', username: 'example_ai' },
+  createdAt: '2026-10-15T12:01:00Z',
+  text: 'Sample public post about AI evaluations.',
+  repostedBy: 'example_curator',
+  quote: {
+    author: { id: '790', name: 'Another Author', username: 'quoted_example' },
+    text: 'A quoted result.',
+  },
+  media: [
+    {
+      type: 'video',
+      url: '/media/golden-gate.webp',
+      alt: 'Fixture video preview.',
+    },
+  ],
+  metrics: { replies: 2, reposts: 3, likes: 4 },
+}
+const listSnapshot = {
+  posts: [sampleListPost],
+  updatedAt: '2026-10-15T12:10:00Z',
+}
+
+// Preview and UI tests never consume the deployed feed.
+test.beforeEach(async ({ page }) => {
+  await page.route('**/api/high-signal', (route) =>
+    route.fulfill({ json: listSnapshot })
+  )
+})
 
 test('preview drafts, replies and posts survive reload under the right account', async ({
   page,
@@ -66,6 +98,7 @@ test('bookmarks, search, feed options and the desktop shell work without outside
       external.push(r.url())
   })
   await page.goto('/')
+  await page.getByRole('button', { name: 'For you', exact: true }).click()
   const post = page.getByRole('article').first()
   await post.getByRole('button', { name: 'Like', exact: true }).click()
   await expect(
@@ -148,6 +181,7 @@ test('mobile navigation, dialogs and direct routes fit at narrow widths', async 
   ).toBeVisible()
   await page.getByRole('button', { name: 'Close', exact: true }).click()
   await nav.getByRole('button', { name: 'Home', exact: true }).click()
+  await page.getByRole('button', { name: 'For you', exact: true }).click()
   await page
     .getByRole('article')
     .first()
@@ -209,4 +243,143 @@ test('pinned accounts set keyboard order and switching identities preserves comp
   await page.keyboard.press('Escape')
   await page.keyboard.press('Alt+1')
   await expect(page.locator('main textarea')).toHaveValue('A studio draft')
+})
+
+test('AI High Signal is the public home timeline, with original post links and read-only metrics', async ({
+  page,
+}) => {
+  let requests = 0
+  await page.route('**/api/high-signal', (route) => {
+    requests++
+    expect(route.request().method()).toBe('GET')
+    expect(new URL(route.request().url()).origin).toBe(
+      new URL(page.url()).origin
+    )
+    return route.fulfill({ json: listSnapshot })
+  })
+  await page.goto('/bookmarks')
+  await expect(
+    page.getByRole('heading', { name: 'Bookmarks', exact: true })
+  ).toBeVisible()
+  expect(requests).toBe(0)
+  await page.getByRole('link', { name: 'Home', exact: true }).click()
+  const listTab = page.getByRole('button', {
+    name: 'AI High Signal',
+    exact: true,
+  })
+  await expect(listTab).toHaveAttribute('aria-pressed', 'true')
+  const post = page
+    .getByRole('article')
+    .filter({ hasText: sampleListPost.text })
+  await expect(post).toContainText('@example_ai')
+  await expect(
+    post.getByRole('link', { name: '@example_curator reposted' })
+  ).toHaveAttribute('href', 'https://x.com/example_curator')
+  await expect(post).toContainText('A quoted result.')
+  await expect(post.getByRole('link', { name: 'Watch on X' })).toHaveAttribute(
+    'href',
+    'https://x.com/i/status/' + sampleListPost.id
+  )
+  await expect(post.locator('time')).toHaveAttribute(
+    'datetime',
+    sampleListPost.createdAt
+  )
+  await expect(post.getByRole('link', { name: 'View on X' })).toHaveAttribute(
+    'href',
+    'https://x.com/example_ai/status/' + sampleListPost.id
+  )
+  await expect(
+    post.getByRole('button', { name: 'Like', exact: true })
+  ).toHaveCount(0)
+  await expect(
+    page.getByText('Took the long way home', { exact: false })
+  ).toHaveCount(0)
+  await page.getByRole('button', { name: 'For you', exact: true }).click()
+  await expect(
+    page.getByText('Took the long way home', { exact: false })
+  ).toBeVisible()
+  await expect(post).toHaveCount(0)
+  await page.reload()
+  await expect(
+    page.getByRole('button', { name: 'For you', exact: true })
+  ).toHaveAttribute('aria-pressed', 'true')
+  expect(requests).toBe(1)
+})
+
+test('list failure can be retried and an empty list does not show sample posts', async ({
+  page,
+}) => {
+  let requests = 0
+  await page.route('**/api/high-signal', (route) => {
+    requests++
+    if (requests === 1)
+      return route.fulfill({
+        status: 503,
+        body: 'sensitive upstream diagnostic',
+      })
+    if (requests === 2)
+      return route.fulfill({ json: { ...listSnapshot, posts: [] } })
+    return route.fulfill({ json: listSnapshot })
+  })
+  await page.goto('/')
+  await expect(page.getByRole('alert')).toContainText(
+    'Couldn’t load the AI High Signal feed.'
+  )
+  await expect(page.getByText('sensitive upstream diagnostic')).toHaveCount(0)
+  await page.getByRole('button', { name: 'Try again' }).click()
+  await expect(
+    page.getByRole('heading', { name: 'No posts in this list yet' })
+  ).toBeVisible()
+  await expect(page.getByRole('article')).toHaveCount(0)
+  await page.getByRole('button', { name: 'Refresh AI High Signal' }).click()
+  await expect(page.getByText(sampleListPost.text)).toBeVisible()
+})
+
+test('connected accounts keep Following as their default and the list keeps original author and repost credit', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const profile = {
+      id: '4321',
+      name: 'Connected Fixture',
+      username: 'connected_fixture',
+    }
+    localStorage.setItem('superTwitter.account', JSON.stringify(profile))
+    window.addEventListener('message', (event) => {
+      const request = event.data
+      if (request?.source !== 'supertwitter:page') return
+      const result =
+        request.method === 'accounts'
+          ? [profile]
+          : request.method === 'timeline'
+            ? { posts: [] }
+            : {}
+      window.postMessage(
+        { source: 'supertwitter:extension', id: request.id, ok: true, result },
+        location.origin
+      )
+    })
+  })
+  await page.goto('/')
+  await expect(
+    page.getByRole('button', { name: 'Following', exact: true })
+  ).toHaveAttribute('aria-pressed', 'true')
+  await expect(
+    page.getByRole('heading', { name: 'No posts yet' })
+  ).toBeVisible()
+  await page
+    .getByRole('button', { name: 'AI High Signal', exact: true })
+    .click()
+  const post = page
+    .getByRole('article')
+    .filter({ hasText: sampleListPost.text })
+  await expect(
+    post.getByRole('link', { name: '@example_curator reposted' })
+  ).toHaveAttribute('href', 'https://x.com/example_curator')
+  await expect(
+    post.getByRole('button', { name: /Example Research @example_ai/ })
+  ).toBeVisible()
+  await expect(
+    post.getByRole('button', { name: 'Like', exact: true })
+  ).toBeVisible()
 })

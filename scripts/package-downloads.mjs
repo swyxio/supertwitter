@@ -47,7 +47,7 @@ await archive(
   ),
   'extension'
 )
-const folders = ['public', 'src', 'scripts', 'tests']
+const folders = ['public', 'src', 'scripts', 'tests', 'worker']
 const files = [
   '.gitignore',
   'index.html',
